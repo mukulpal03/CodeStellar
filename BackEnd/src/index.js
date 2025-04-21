@@ -1,6 +1,5 @@
 import app from "./app.js";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
 
 dotenv.config();
 
