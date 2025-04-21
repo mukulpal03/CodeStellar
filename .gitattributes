@@ -1,0 +1,9 @@
+# Normalize line endings
+* text=auto
+
+# Force LF for common source files
+*.js     text eol=lf
+*.json   text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.md     text eol=lf
