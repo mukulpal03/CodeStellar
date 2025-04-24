@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import healthCheckRoutes from "./routes/healthcheck.routes.js";
+import { maintenanceMode } from "./middlewares/maintenance.middleware.js";
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
 app.use(helmet());
+app.use(maintenanceMode);
 
 app.use("*", (_req, res) => {
   res.status(404).json({
