@@ -7,6 +7,4 @@ class ApiResponse {
   }
 }
 
-const apiResponse = new ApiResponse();
-
-export { apiResponse };
+export { ApiResponse };
