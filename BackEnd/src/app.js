@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import healthCheckRoutes from "./routes/healthcheck.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import { maintenanceMode } from "./middlewares/maintenance.middleware.js";
 
 const app = express();
@@ -13,14 +14,15 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(maintenanceMode);
 
-app.use("*", (_req, res) => {
+app.use("/api/v1/health", healthCheckRoutes);
+app.use("/api/v1/auth", authRoutes);
+
+app.use((_req, res) => {
   res.status(404).json({
     message: "Page not found",
     success: false,
   });
 });
-
-app.use("/api/v1/health", healthCheckRoutes);
 
 app.use((err, _req, res, _next) => {
   const statusCode = err.statusCode || 500;

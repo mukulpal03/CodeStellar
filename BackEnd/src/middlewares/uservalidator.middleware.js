@@ -1,4 +1,4 @@
-import { apiError } from "../utils/ApiError.js";
+import { ApiError } from "../utils/ApiError.js";
 import {
   loginUserSchema,
   passwordChangeSchema,
@@ -11,7 +11,7 @@ const validateRegisterUser = (req, _res, next) => {
 
   if (!validationResult.success) {
     return next(
-      apiError(
+      new ApiError(
         400,
         "Validation failed",
         validationResult.error.issues[0].message,
@@ -27,7 +27,7 @@ const validateLoginUser = (req, _res, next) => {
 
   if (!validationResult.success) {
     return next(
-      apiError(
+        new ApiError(
         400,
         "Validation failed",
         validationResult.error.issues[0].message,
@@ -43,7 +43,7 @@ const validateEmail = (req, _res, next) => {
 
   if (!validationResult.success) {
     return next(
-      apiError(
+        new ApiError(
         400,
         "Validation failed",
         validationResult.error.issues[0].message,
@@ -59,7 +59,7 @@ const validatePassword = (req, _res, next) => {
 
   if (!validationResult.success) {
     return next(
-      apiError(
+        new ApiError(
         400,
         "Validation failed",
         validationResult.error.issues[0].message,
