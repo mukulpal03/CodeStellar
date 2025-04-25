@@ -255,4 +255,63 @@ const refreshAccessToken = async (req, res, next) => {
     );
 };
 
-export { registerUser, verifyUser, loginUser, logoutUser, refreshAccessToken };
+const getProfile = async (req, res, next) => {
+  const id = req.user?.id;
+
+  const user = await db.user.findFirst({
+    where: {
+      id,
+    },
+    omit: {
+      password: false,
+      refreshToken: false,
+    },
+  });
+
+  res.status(200).json(new ApiResponse(200, `Welcome ${user.name}`, user));
+};
+
+const resendEmailVerification = async (req, res, next) => {
+  const token = crypto.randomBytes(32).toString("hex");
+
+  const user = await db.user.update({
+    where: {
+      id: req.user.id,
+    },
+    omit: {
+      password: true,
+      refreshToken: true,
+    },
+    data: {
+      verificationToken: token,
+      verificationTokenExpiry: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
+
+  if (!user) {
+    return next(new ApiError(500, "Error while generating token"));
+  }
+
+  await sendMail({
+    email: user.email,
+    subject: "Email Verification",
+    mailGenContent: registerUserMailGenContent(
+      user.name,
+      `
+      ${process.env.BASE_URL}/auth/verify/${token}
+      `,
+    ),
+  });
+
+  res.status(200).json(new ApiResponse(200, "Mail sent successfully"));
+};
+
+export {
+  registerUser,
+  verifyUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  getProfile,
+  resendEmailVerification,
+};
