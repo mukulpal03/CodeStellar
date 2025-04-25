@@ -390,6 +390,43 @@ const resetPassword = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "Password reset successfully"));
 };
 
+const changeCurrentPassword = async (req, res, next) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  const user = await db.user.findFirst({
+    where: {
+      id: req.user.id,
+    },
+  });  
+
+  const matchPassword = await bcrypt.compare(currentPassword, user.password);
+  
+  if (!matchPassword) {
+    return next(new ApiError(401, "Current password is incorrect"));
+  }
+
+  if (newPassword !== confirmPassword) {
+    return next(
+      new ApiError(400, "Confirm password doesn't match with new password"),
+    );
+  }
+
+  const passwordChanged = await db.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password: newPassword,
+    },
+  });
+
+  if (!passwordChanged) {
+    return next(new ApiError(500, "Error while changing the password"));
+  }
+
+  res.status(200).json(new ApiResponse(200, "Password changed successfully"));
+};
+
 export {
   registerUser,
   verifyUser,
@@ -400,4 +437,5 @@ export {
   resendEmailVerification,
   forgotPasswordReq,
   resetPassword,
+  changeCurrentPassword
 };
