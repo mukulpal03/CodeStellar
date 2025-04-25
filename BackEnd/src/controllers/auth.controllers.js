@@ -2,7 +2,38 @@ import { db } from "../libs/db.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { sendMail, registerUserMailGenContent } from "../utils/mail.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../services/generateAccessRefreshToken.service.js";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
+
+async function generateAccessAndRefreshToken(userId) {
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+
+    await db.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        refreshToken,
+      },
+    });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(400, "Error while generating access or refresh token");
+  }
+}
 
 const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -44,7 +75,25 @@ const registerUser = async (req, res, next) => {
     ),
   });
 
-  res.status(201).json(new ApiResponse(201, "User registered successfully"));
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    user.id,
+  );
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .status(201)
+    .json(
+      new ApiResponse(201, "User registered successfully", {
+        accessToken,
+        refreshToken,
+      }),
+    );
 };
 
 const verifyUser = async (req, res, next) => {
@@ -82,4 +131,44 @@ const verifyUser = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "User verified successfully"));
 };
 
-export { registerUser, verifyUser };
+const loginUser = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const userExists = await db.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!userExists) {
+    return next(new ApiError(401, "Invalid email or password"));
+  }
+
+  const matchPassword = await bcrypt.compare(password, userExists.password);
+
+  if (!matchPassword) {
+    return next(new ApiError(401, "Invalid email or password"));
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    userExists.id,
+  );
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .status(201)
+    .json(
+      new ApiResponse(200, "User logged in successfully", {
+        accessToken,
+        refreshToken,
+      }),
+    );
+};
+
+export { registerUser, verifyUser, loginUser };

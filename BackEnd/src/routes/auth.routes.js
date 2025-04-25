@@ -1,7 +1,14 @@
 import { Router } from "express";
 import { asyncHandler } from "../utils/asynchandler.js";
-import { registerUser, verifyUser } from "../controllers/auth.controllers.js";
-import { validateRegisterUser } from "../middlewares/uservalidator.middleware.js";
+import {
+  loginUser,
+  registerUser,
+  verifyUser,
+} from "../controllers/auth.controllers.js";
+import {
+  validateRegisterUser,
+  validateLoginUser,
+} from "../middlewares/uservalidator.middleware.js";
 
 const router = Router();
 
@@ -11,4 +18,5 @@ router
 
 router.route("/verify/:token").post(asyncHandler(verifyUser));
 
+router.route("/login").post(validateLoginUser, asyncHandler(loginUser));
 export default router;
