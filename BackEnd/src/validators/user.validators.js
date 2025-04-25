@@ -63,12 +63,12 @@ const passwordChangeSchema = z.object({
   }),
   newPassword: z
     .string({
-      required_error: "Password is required",
+      required_error: "New Password is required",
     })
     .min(6, { message: "Password must be atleast 6 characters" })
     .max(30, { message: "Password cannot exceed 30 characters" }),
   confirmPassword: z.string({
-    required_error: "Current Password is required",
+    required_error: "Confirm Password is required",
   }),
 });
 

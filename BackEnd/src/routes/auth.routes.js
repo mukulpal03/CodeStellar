@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../utils/asynchandler.js";
 import {
+  changeCurrentPassword,
   forgotPasswordReq,
   getProfile,
   loginUser,
@@ -16,7 +17,7 @@ import {
   validateLoginUser,
   validateEmail,
   validatePassword,
-  validatePasswordChange
+  validatePasswordChange,
 } from "../middlewares/uservalidator.middleware.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 
@@ -47,5 +48,13 @@ router
 router
   .route("/reset-password/:token")
   .post(validatePassword, asyncHandler(resetPassword));
+
+router
+  .route("/change-password")
+  .post(
+    isLoggedIn,
+    validatePasswordChange,
+    asyncHandler(changeCurrentPassword),
+  );
 
 export default router;
