@@ -171,4 +171,35 @@ const loginUser = async (req, res, next) => {
     );
 };
 
-export { registerUser, verifyUser, loginUser };
+const logoutUser = async (req, res, next) => {
+  const id = req.user?.id;
+
+  const user = await db.user.update({
+    where: {
+      id,
+    },
+    omit: {
+      password: false,
+    },
+    data: {
+      refreshToken: null,
+    },
+  });
+
+  if (!user) {
+    return next(new ApiError(500, "Error while logging out user"));
+  }
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, "User logged out successfully"));
+};
+
+export { registerUser, verifyUser, loginUser, logoutUser };
