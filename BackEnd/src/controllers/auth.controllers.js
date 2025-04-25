@@ -1,7 +1,11 @@
 import { db } from "../libs/db.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { sendMail, registerUserMailGenContent } from "../utils/mail.js";
+import {
+  sendMail,
+  registerUserMailGenContent,
+  resetPasswordMailGenContent,
+} from "../utils/mail.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -306,6 +310,51 @@ const resendEmailVerification = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "Mail sent successfully"));
 };
 
+const forgotPasswordReq = async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await db.user.findUnique({
+    where: {
+      email,
+    },
+    omit: {
+      password: true,
+      refreshToken: true,
+    },
+  });
+
+  if (!user) {
+    return next(new ApiError(400, "Incorrect email"));
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+
+  await db.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      resetPasswordToken: token,
+      resetPasswordExpiry: new Date(new Date() + 20 * 60 * 1000),
+    },
+  });
+
+  await sendMail({
+    email: user.email,
+    subject: "Password reset",
+    mailGenContent: resetPasswordMailGenContent(
+      user.name,
+      `
+      ${process.env.BASE_URL}/auth/reset-password/${token}
+      `,
+    ),
+  });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Reset password mail sent successfully"));
+};
+
 export {
   registerUser,
   verifyUser,
@@ -314,4 +363,5 @@ export {
   refreshAccessToken,
   getProfile,
   resendEmailVerification,
+  forgotPasswordReq
 };

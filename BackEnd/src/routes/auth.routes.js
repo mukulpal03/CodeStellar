@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../utils/asynchandler.js";
 import {
+  forgotPasswordReq,
   getProfile,
   loginUser,
   logoutUser,
@@ -12,6 +13,7 @@ import {
 import {
   validateRegisterUser,
   validateLoginUser,
+  validateEmail,
 } from "../middlewares/uservalidator.middleware.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 
@@ -31,6 +33,12 @@ router.route("/refresh").post(asyncHandler(refreshAccessToken));
 
 router.route("/profile").get(isLoggedIn, asyncHandler(getProfile));
 
-router.route("/resendVerifyMail").post(isLoggedIn, asyncHandler(resendEmailVerification))
+router
+  .route("/resendVerifyMail")
+  .post(isLoggedIn, asyncHandler(resendEmailVerification));
+
+router
+  .route("/forgot-password")
+  .get(validateEmail, asyncHandler(forgotPasswordReq));
 
 export default router;
