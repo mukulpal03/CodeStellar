@@ -8,12 +8,15 @@ import {
   refreshAccessToken,
   registerUser,
   resendEmailVerification,
+  resetPassword,
   verifyUser,
 } from "../controllers/auth.controllers.js";
 import {
   validateRegisterUser,
   validateLoginUser,
   validateEmail,
+  validatePassword,
+  validatePasswordChange
 } from "../middlewares/uservalidator.middleware.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 
@@ -40,5 +43,9 @@ router
 router
   .route("/forgot-password")
   .get(validateEmail, asyncHandler(forgotPasswordReq));
+
+router
+  .route("/reset-password/:token")
+  .post(validatePassword, asyncHandler(resetPassword));
 
 export default router;

@@ -335,7 +335,7 @@ const forgotPasswordReq = async (req, res, next) => {
     },
     data: {
       resetPasswordToken: token,
-      resetPasswordExpiry: new Date(new Date() + 20 * 60 * 1000),
+      resetPasswordExpiry: new Date(Date.now() + 10 * 60 * 1000),
     },
   });
 
@@ -355,6 +355,41 @@ const forgotPasswordReq = async (req, res, next) => {
     .json(new ApiResponse(200, "Reset password mail sent successfully"));
 };
 
+const resetPassword = async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const user = await db.user.findFirst({
+    where: {
+      resetPasswordToken: token,
+    },
+  });
+
+  if (!user) {
+    return next(new ApiError(403, "Invalid token"));
+  }
+
+  console.log(user.resetPasswordExpiry);
+  console.log(new Date());
+
+  if (user.resetPasswordExpiry < new Date()) {
+    return next(new ApiError(400, "Token expired"));
+  }
+
+  await db.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password,
+      resetPasswordToken: null,
+      resetPasswordExpiry: null,
+    },
+  });
+
+  res.status(200).json(new ApiResponse(200, "Password reset successfully"));
+};
+
 export {
   registerUser,
   verifyUser,
@@ -363,5 +398,6 @@ export {
   refreshAccessToken,
   getProfile,
   resendEmailVerification,
-  forgotPasswordReq
+  forgotPasswordReq,
+  resetPassword,
 };

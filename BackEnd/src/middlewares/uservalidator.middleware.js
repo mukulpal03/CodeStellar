@@ -4,6 +4,7 @@ import {
   passwordChangeSchema,
   registerUserSchema,
   EmailSchema,
+  passwordSchema,
 } from "../validators/user.validators.js";
 
 const validateRegisterUser = (req, _res, next) => {
@@ -27,7 +28,7 @@ const validateLoginUser = (req, _res, next) => {
 
   if (!validationResult.success) {
     return next(
-        new ApiError(
+      new ApiError(
         400,
         "Validation failed",
         validationResult.error.issues[0].message,
@@ -43,7 +44,7 @@ const validateEmail = (req, _res, next) => {
 
   if (!validationResult.success) {
     return next(
-        new ApiError(
+      new ApiError(
         400,
         "Validation failed",
         validationResult.error.issues[0].message,
@@ -55,11 +56,27 @@ const validateEmail = (req, _res, next) => {
 };
 
 const validatePassword = (req, _res, next) => {
+  const validationResult = passwordSchema.safeParse({ ...req.body });
+
+  if (!validationResult.success) {
+    return next(
+      new ApiError(
+        400,
+        "Validation failed",
+        validationResult.error.issues[0].message,
+      ),
+    );
+  }
+
+  next();
+};
+
+const validatePasswordChange = (req, _res, next) => {
   const validationResult = passwordChangeSchema.safeParse({ ...req.body });
 
   if (!validationResult.success) {
     return next(
-        new ApiError(
+      new ApiError(
         400,
         "Validation failed",
         validationResult.error.issues[0].message,
@@ -75,4 +92,5 @@ export {
   validateLoginUser,
   validateEmail,
   validatePassword,
+  validatePasswordChange
 };

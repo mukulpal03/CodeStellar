@@ -48,6 +48,15 @@ const EmailSchema = z.object({
     .toLowerCase(),
 });
 
+const passwordSchema = z.object({
+  password: z
+    .string({
+      required_error: "Password is required",
+    })
+    .min(6, { message: "Password must be atleast 6 characters" })
+    .max(30, { message: "Password cannot exceed 30 characters" }),
+});
+
 const passwordChangeSchema = z.object({
   currentPassword: z.string({
     required_error: "Current Password is required",
@@ -68,4 +77,5 @@ export {
   loginUserSchema,
   EmailSchema,
   passwordChangeSchema,
+  passwordSchema,
 };
