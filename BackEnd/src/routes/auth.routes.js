@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asynchandler.js";
 import {
   loginUser,
   logoutUser,
+  refreshAccessToken,
   registerUser,
   verifyUser,
 } from "../controllers/auth.controllers.js";
@@ -23,5 +24,7 @@ router.route("/verify/:token").post(asyncHandler(verifyUser));
 router.route("/login").post(validateLoginUser, asyncHandler(loginUser));
 
 router.route("/logout").post(isLoggedIn, asyncHandler(logoutUser));
+
+router.route("/refresh").post(asyncHandler(refreshAccessToken));
 
 export default router;

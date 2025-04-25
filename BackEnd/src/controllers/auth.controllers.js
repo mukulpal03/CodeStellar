@@ -8,6 +8,7 @@ import {
 } from "../services/generateAccessRefreshToken.service.js";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 async function generateAccessAndRefreshToken(userId) {
   try {
@@ -202,4 +203,56 @@ const logoutUser = async (req, res, next) => {
     .json(new ApiResponse(200, "User logged out successfully"));
 };
 
-export { registerUser, verifyUser, loginUser, logoutUser };
+const refreshAccessToken = async (req, res, next) => {
+  const currRefreshToken = req.cookies?.refreshToken;
+
+  if (!currRefreshToken) {
+    return next(
+      new ApiError(403, "Refresh token has expired. Please log in again."),
+    );
+  }
+
+  const decoded = jwt.verify(
+    currRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET,
+  );
+
+  const user = await db.user.findFirst({
+    where: {
+      id: decoded.id,
+    },
+    omit: {
+      password: true,
+    },
+  });
+
+  if (!user) {
+    return next(new ApiError(404, "No user found"));
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    user.id,
+  );
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "New access and refresh token generated successfully",
+        {
+          accessToken,
+          refreshToken,
+        },
+      ),
+    );
+};
+
+export { registerUser, verifyUser, loginUser, logoutUser, refreshAccessToken };
