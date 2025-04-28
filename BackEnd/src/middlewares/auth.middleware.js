@@ -33,4 +33,28 @@ const isLoggedIn = async (req, _res, next) => {
   }
 };
 
-export { isLoggedIn };
+const checkAdmin = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await db.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        role: true,
+      },
+    });
+
+    if (!user || user.role !== "ADMIN") {
+      return next(new ApiError(403, "You do not have permission"));
+    }
+
+    next();
+  } catch (error) {
+    console.log(error);
+    return next(new ApiError(500, "Error checking admin role"));
+  }
+};
+
+export { isLoggedIn, checkAdmin };
