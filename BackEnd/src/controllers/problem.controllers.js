@@ -2,9 +2,10 @@ import {
   getJudge0LanguageId,
   pollBatchResults,
   submitBatch,
-} from "../libs/judge0.lib";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
+} from "../libs/judge0.lib.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { db } from "../libs/db.js";
 
 const createProblem = async (req, res, next) => {
   const {
@@ -77,7 +78,6 @@ const createProblem = async (req, res, next) => {
       .status(201)
       .json(new ApiResponse(201, "New problem created successfully", problem));
   } catch (error) {
-    console.error(error);
     return next(new ApiError(500, "Error while creating a problem"));
   }
 };
