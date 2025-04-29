@@ -82,4 +82,41 @@ const createProblem = async (req, res, next) => {
   }
 };
 
-export { createProblem };
+const getAllProblems = async (req, res, next) => {
+  const problems = await db.problem.findMany({
+    select: {
+      title: true,
+      id: true,
+    },
+  });
+
+  if (!problems) {
+    return next(new ApiError(404, "No problems found"));
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Here are your all problems", problems));
+};
+
+const getProblemById = async (req, res, next) => {
+  const { id } = req.params;
+
+  const problem = await db.problem.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      title: true,
+      id: true,
+    },
+  });
+
+  if (!problem) {
+    return next(new ApiError(404, "No problem found"));
+  }
+
+  res.status(200).json(new ApiResponse(200, "Here is your problem", problem));
+};
+
+export { createProblem, getAllProblems, getProblemById };
