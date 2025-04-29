@@ -3,6 +3,7 @@ import { checkAdmin, isLoggedIn } from "../middlewares/auth.middleware.js";
 import { asyncHandler } from "../utils/asynchandler.js";
 import {
   createProblem,
+  deleteProblem,
   getAllProblems,
   getProblemById,
   updateProblem,
@@ -18,6 +19,7 @@ router
 router
   .route("/:id")
   .get(isLoggedIn, asyncHandler(getProblemById))
-  .put(isLoggedIn, checkAdmin, asyncHandler(updateProblem));
+  .put(isLoggedIn, checkAdmin, asyncHandler(updateProblem))
+  .delete(isLoggedIn, checkAdmin, asyncHandler(deleteProblem));
 
 export default router;

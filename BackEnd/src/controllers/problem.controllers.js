@@ -203,4 +203,26 @@ const updateProblem = async (req, res, next) => {
     .json(new ApiResponse(200, "Problem updated successfully", updatedProblem));
 };
 
-export { createProblem, getAllProblems, getProblemById, updateProblem };
+const deleteProblem = async (req, res, next) => {
+  const { id } = req.params;
+
+  const problem = await db.problem.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!problem) {
+    return next(new ApiError(404, "No problem found"));
+  }
+
+  await db.problem.delete({
+    where: {
+      id: problem.id,
+    },
+  });
+
+  res.status(200).json(new ApiResponse(200, "Problem deleted successfully"));
+};
+
+export { createProblem, getAllProblems, getProblemById, updateProblem, deleteProblem };
