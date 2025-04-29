@@ -19,7 +19,7 @@ const createProblem = async (req, res, next) => {
     referenceSolution,
   } = req.body;
 
-  if (!req.user.role !== "ADMIN") {
+  if (req.user.role !== "ADMIN") {
     return next(new ApiError(403, "You are not allowed to create a problem"));
   }
 
@@ -56,8 +56,10 @@ const createProblem = async (req, res, next) => {
           );
         }
       }
+    }
 
-      const problem = await db.problem.create({
+    const problem = await db.problem.create({
+      data: {
         title,
         description,
         difficulty,
@@ -68,14 +70,12 @@ const createProblem = async (req, res, next) => {
         codeSnippet,
         referenceSolution,
         userId: req.user.id,
-      });
+      },
+    });
 
-      return res
-        .status(201)
-        .json(
-          new ApiResponse(201, "New problem created successfully", problem),
-        );
-    }
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "New problem created successfully", problem));
   } catch (error) {
     console.error(error);
     return next(new ApiError(500, "Error while creating a problem"));
