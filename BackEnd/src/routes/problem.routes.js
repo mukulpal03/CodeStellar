@@ -5,6 +5,7 @@ import {
   createProblem,
   getAllProblems,
   getProblemById,
+  updateProblem,
 } from "../controllers/problem.controllers.js";
 
 const router = Router();
@@ -14,6 +15,9 @@ router
   .get(isLoggedIn, asyncHandler(getAllProblems))
   .post(isLoggedIn, checkAdmin, asyncHandler(createProblem));
 
-router.route("/:id").get(isLoggedIn, asyncHandler(getProblemById));
+router
+  .route("/:id")
+  .get(isLoggedIn, asyncHandler(getProblemById))
+  .put(isLoggedIn, checkAdmin, asyncHandler(updateProblem));
 
 export default router;

@@ -119,4 +119,88 @@ const getProblemById = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "Here is your problem", problem));
 };
 
-export { createProblem, getAllProblems, getProblemById };
+const updateProblem = async (req, res, next) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    difficulty,
+    tags,
+    examples,
+    constraints,
+    testCases,
+    codeSnippet,
+    referenceSolution,
+  } = req.body;
+
+  const problem = await db.problem.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!problem) {
+    return next(new ApiError(404, "No problem found"));
+  }
+
+  for (const [language, solutionCode] of Object.entries(referenceSolution)) {
+    const languageId = getJudge0LanguageId(language);
+
+    if (!languageId) {
+      return next(new ApiError(`${language} is not supported`));
+    }
+
+    const submissions = testCases.map(({ input, output }) => ({
+      source_code: solutionCode,
+      language_id: languageId,
+      stdin: input,
+      expected_output: output,
+    }));
+
+    const submissionResults = await submitBatch(submissions);
+
+    const tokens = submissionResults.map((r) => r.token);
+
+    const results = await pollBatchResults(tokens);
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+
+      if (result.status.id !== 3) {
+        return next(
+          new ApiError(
+            400,
+            `Testcase ${i + 1} failed for language ${language}`,
+          ),
+        );
+      }
+    }
+  }
+
+  const updatedProblem = await db.problem.update({
+    where: {
+      id: problem.id,
+    },
+    data: {
+      title,
+      description,
+      difficulty,
+      tags,
+      examples,
+      constraints,
+      testCases,
+      codeSnippet,
+      referenceSolution,
+    },
+    select: {
+      title: true,
+      id: true,
+    },
+  });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Problem updated successfully", updatedProblem));
+};
+
+export { createProblem, getAllProblems, getProblemById, updateProblem };
