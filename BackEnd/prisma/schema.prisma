@@ -20,21 +20,23 @@ enum userRole {
 }
 
 model User {
-  id                      String    @id @default(uuid())
+  id                      String          @id @default(uuid())
   name                    String
-  email                   String    @unique
+  email                   String          @unique
   password                String
   image                   String?
-  role                    userRole  @default(USER)
-  isVerified              Boolean   @default(false)
+  role                    userRole        @default(USER)
+  isVerified              Boolean         @default(false)
   verificationToken       String?
   verificationTokenExpiry DateTime?
   refreshToken            String?
   resetPasswordToken      String?
   resetPasswordExpiry     DateTime?
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @default(now())
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @default(now())
   Problem                 Problem[]
+  Submission              Submission[]
+  ProblemSolved           ProblemSolved[]
 }
 
 enum Difficulty {
@@ -60,5 +62,62 @@ model Problem {
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submission    Submission[]
+  ProblemSolved ProblemSolved[]
+}
+
+model Submission {
+  id            String   @id @default(uuid())
+  userId        String
+  problemId     String
+  sourceCode    Json
+  language      String
+  stdin         String?
+  stdout        String?
+  stderr        String?
+  compileOutput String?
+  status        String
+  memory        String?
+  time          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  testCases TestCaseResult[]
+}
+
+model TestCaseResult {
+  id             String   @id @default(uuid())
+  submissionId   String
+  testCase       Int
+  passed         Boolean
+  stdout         String?
+  expectedOutput String?
+  stderr         String?
+  compileOutput  String?
+  status         String?
+  memory         String?
+  time           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+}
+
+model ProblemSolved {
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
 }
