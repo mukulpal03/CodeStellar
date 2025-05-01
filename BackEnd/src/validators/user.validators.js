@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 const registerUserSchema = z.object({
-  name: z
+  username: z
     .string({
       required_error: "Name is required",
       invalid_type_error: "Name must be a string",
     })
-    .min(2, { message: "Name must be atleast 2 characters" })
-    .max(30, { message: "Name cannot exceed 30 characters" })
+    .min(2, { message: "username must be atleast 2 characters" })
+    .max(30, { message: "username cannot exceed 30 characters" })
     .trim()
     .toLowerCase(),
   email: z

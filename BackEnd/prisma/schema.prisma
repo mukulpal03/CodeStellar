@@ -23,8 +23,10 @@ model User {
   id                      String          @id @default(uuid())
   name                    String
   email                   String          @unique
+  username                String          @unique
   password                String
   image                   String?
+  bio                     String?
   role                    userRole        @default(USER)
   isVerified              Boolean         @default(false)
   verificationToken       String?

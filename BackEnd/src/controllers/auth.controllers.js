@@ -41,7 +41,7 @@ async function generateAccessAndRefreshToken(userId) {
 }
 
 const registerUser = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { username, email, password } = req.body;
 
   const existingUser = await db.user.findUnique({
     where: {
@@ -57,7 +57,8 @@ const registerUser = async (req, res, next) => {
 
   const user = await db.user.create({
     data: {
-      name,
+      username,
+      name: username,
       email,
       password,
       verificationToken: token,
@@ -259,22 +260,6 @@ const refreshAccessToken = async (req, res, next) => {
     );
 };
 
-const getProfile = async (req, res, next) => {
-  const id = req.user?.id;
-
-  const user = await db.user.findFirst({
-    where: {
-      id,
-    },
-    omit: {
-      password: true,
-      refreshToken: true,
-    },
-  });
-
-  res.status(200).json(new ApiResponse(200, `Welcome ${user.name}`, user));
-};
-
 const resendEmailVerification = async (req, res, next) => {
   const token = crypto.randomBytes(32).toString("hex");
 
@@ -433,7 +418,6 @@ export {
   loginUser,
   logoutUser,
   refreshAccessToken,
-  getProfile,
   resendEmailVerification,
   forgotPasswordReq,
   resetPassword,

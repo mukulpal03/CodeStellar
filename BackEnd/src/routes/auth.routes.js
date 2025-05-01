@@ -3,7 +3,6 @@ import { asyncHandler } from "../utils/asynchandler.js";
 import {
   changeCurrentPassword,
   forgotPasswordReq,
-  getProfile,
   loginUser,
   logoutUser,
   refreshAccessToken,
@@ -34,8 +33,6 @@ router.route("/login").post(validateLoginUser, asyncHandler(loginUser));
 router.route("/logout").post(isLoggedIn, asyncHandler(logoutUser));
 
 router.route("/refresh").post(asyncHandler(refreshAccessToken));
-
-router.route("/profile").get(isLoggedIn, asyncHandler(getProfile));
 
 router
   .route("/resendVerifyMail")
