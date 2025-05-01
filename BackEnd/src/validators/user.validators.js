@@ -23,7 +23,7 @@ const registerUserSchema = z.object({
     })
     .min(6, { message: "Password must be atleast 6 characters" })
     .max(30, { message: "Password cannot exceed 30 characters" }),
-});
+}).strict();
 
 const loginUserSchema = z.object({
   email: z
@@ -36,7 +36,7 @@ const loginUserSchema = z.object({
   password: z.string({
     required_error: "Password is required",
   }),
-});
+}).strict();
 
 const EmailSchema = z.object({
   email: z
@@ -46,7 +46,7 @@ const EmailSchema = z.object({
     .email({ message: "Invalid email address" })
     .trim()
     .toLowerCase(),
-});
+}).strict();
 
 const passwordSchema = z.object({
   password: z
@@ -55,7 +55,7 @@ const passwordSchema = z.object({
     })
     .min(6, { message: "Password must be atleast 6 characters" })
     .max(30, { message: "Password cannot exceed 30 characters" }),
-});
+}).strict();
 
 const passwordChangeSchema = z.object({
   currentPassword: z.string({
@@ -70,7 +70,7 @@ const passwordChangeSchema = z.object({
   confirmPassword: z.string({
     required_error: "Confirm Password is required",
   }),
-});
+}).strict();
 
 export {
   registerUserSchema,

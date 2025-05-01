@@ -9,7 +9,7 @@ import {
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../services/generateAccessRefreshToken.service.js";
+} from "../utils/generateAccessRefreshToken.service.js";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -267,8 +267,8 @@ const getProfile = async (req, res, next) => {
       id,
     },
     omit: {
-      password: false,
-      refreshToken: false,
+      password: true,
+      refreshToken: true,
     },
   });
 
