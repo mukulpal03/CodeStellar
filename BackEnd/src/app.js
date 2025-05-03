@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import healthCheckRoutes from "./routes/healthcheck.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
 import problemRoutes from "./routes/problem.routes.js";
 import executionRoutes from "./routes/execute-code.routes.js";
 import { maintenanceMode } from "./middlewares/maintenance.middleware.js";
@@ -18,6 +19,7 @@ app.use(maintenanceMode);
 
 app.use("/api/v1/health", healthCheckRoutes);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/problems", problemRoutes);
 app.use("/api/v1/execute-code", executionRoutes);
 
