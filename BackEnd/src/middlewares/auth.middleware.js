@@ -17,8 +17,12 @@ const isLoggedIn = async (req, _res, next) => {
         id: decoded.id,
       },
       omit: {
-        password: false,
-        refreshToken: false,
+        password: true,
+        refreshToken: true,
+        verificationToken: true,
+        verificationTokenExpiry: true,
+        resetPasswordToken: true,
+        resetPasswordExpiry: true,
       },
     });
 
