@@ -22,8 +22,8 @@ async function generateAccessAndRefreshToken(userId) {
       },
     });
 
-    const accessToken = generateAccessToken(user.id);
-    const refreshToken = generateRefreshToken(user.id);
+    const accessToken = generateAccessToken(user.id, user.role);
+    const refreshToken = generateRefreshToken(user.id, user.role);
 
     await db.user.update({
       where: {
@@ -382,10 +382,10 @@ const changeCurrentPassword = async (req, res, next) => {
     where: {
       id: req.user.id,
     },
-  });  
+  });
 
   const matchPassword = await bcrypt.compare(currentPassword, user.password);
-  
+
   if (!matchPassword) {
     return next(new ApiError(401, "Current password is incorrect"));
   }
@@ -421,5 +421,5 @@ export {
   resendEmailVerification,
   forgotPasswordReq,
   resetPassword,
-  changeCurrentPassword
+  changeCurrentPassword,
 };
