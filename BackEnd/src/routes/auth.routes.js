@@ -12,23 +12,26 @@ import {
   verifyUser,
 } from "../controllers/auth.controllers.js";
 import {
-  validateRegisterUser,
-  validateLoginUser,
-  validateEmail,
-  validatePassword,
-  validatePasswordChange,
-} from "../middlewares/uservalidator.middleware.js";
+  registerUserSchema,
+  loginUserSchema,
+  EmailSchema,
+  passwordSchema,
+  passwordChangeSchema,
+} from "../validators/user.validators.js";
+import { validateData } from "../middlewares/uservalidator.middleware.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 router
   .route("/register")
-  .post(validateRegisterUser, asyncHandler(registerUser));
+  .post(validateData(registerUserSchema), asyncHandler(registerUser));
 
 router.route("/verify/:token").post(asyncHandler(verifyUser));
 
-router.route("/login").post(validateLoginUser, asyncHandler(loginUser));
+router
+  .route("/login")
+  .post(validateData(loginUserSchema), asyncHandler(loginUser));
 
 router.route("/logout").post(isLoggedIn, asyncHandler(logoutUser));
 
@@ -40,17 +43,17 @@ router
 
 router
   .route("/forgot-password")
-  .get(validateEmail, asyncHandler(forgotPasswordReq));
+  .get(validateData(EmailSchema), asyncHandler(forgotPasswordReq));
 
 router
   .route("/reset-password/:token")
-  .post(validatePassword, asyncHandler(resetPassword));
+  .post(validateData(passwordSchema), asyncHandler(resetPassword));
 
 router
   .route("/change-password")
   .post(
     isLoggedIn,
-    validatePasswordChange,
+    validateData(passwordChangeSchema),
     asyncHandler(changeCurrentPassword),
   );
 
