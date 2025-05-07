@@ -10,6 +10,17 @@ const getJudge0LanguageId = (language) => {
   return languageMap[language.toUpperCase()];
 };
 
+const getLanguageName = (languageId) => {
+  const LANGUAGE_NAMES = {
+    74: "Typescript",
+    63: "Javascript",
+    71: "Python",
+    62: "Java",
+  };
+
+  return LANGUAGE_NAMES[languageId] || "Unknown";
+};
+
 const submitBatch = async (submissions) => {
   const { data } = await axios.post(
     `${process.env.JUDGE0_API_URI}/submissions/batch?base64_encoded=false`,
@@ -47,4 +58,4 @@ const pollBatchResults = async (tokens) => {
   }
 };
 
-export { submitBatch, pollBatchResults, getJudge0LanguageId };
+export { submitBatch, pollBatchResults, getJudge0LanguageId, getLanguageName };
