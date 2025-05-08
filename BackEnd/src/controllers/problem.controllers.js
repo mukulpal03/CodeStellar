@@ -6,8 +6,9 @@ import {
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { db } from "../libs/db.js";
+import { validateReferenceSolution } from "../services/problem.service.js";
 
-const createProblem = async (req, res, next) => {
+const createProblem = async (req, res) => {
   const {
     title,
     description,
@@ -24,63 +25,33 @@ const createProblem = async (req, res, next) => {
     throw new ApiError(403, "You are not allowed to create a problem");
   }
 
-  try {
-    for (const [language, solutionCode] of Object.entries(referenceSolution)) {
-      const languageId = getJudge0LanguageId(language);
+  const result = await validateReferenceSolution(referenceSolution, testCases);
 
-      if (!languageId) {
-        throw new ApiError(400, `Language ${language} is not supported`);
-      }
-
-      const submissions = testCases.map(({ input, output }) => ({
-        source_code: solutionCode,
-        language_id: languageId,
-        stdin: input,
-        expected_output: output,
-      }));
-
-      const submissionResults = await submitBatch(submissions);
-
-      const tokens = submissionResults.map((res) => res.token);
-
-      const results = await pollBatchResults(tokens);
-
-      for (let i = 0; i < results.length; i++) {
-        const result = results[i];
-
-        if (result.status.id !== 3) {
-          throw new ApiError(
-            400,
-            `Testcase ${i + 1} failed for language ${language}`,
-          );
-        }
-      }
-    }
-
-    const problem = await db.problem.create({
-      data: {
-        title,
-        description,
-        difficulty,
-        tags,
-        examples,
-        constraints,
-        testCases,
-        codeSnippet,
-        referenceSolution,
-        userId: req.user.id,
-      },
-    });
-
-    return res
-      .status(201)
-      .json(new ApiResponse(201, "New problem created successfully", problem));
-  } catch (error) {
-    throw new ApiError(500, "Error while creating a problem");
+  if (!result) {
+    throw new ApiError(400, "Invalid reference solution");
   }
+
+  const problem = await db.problem.create({
+    data: {
+      title,
+      description,
+      difficulty,
+      tags,
+      examples,
+      constraints,
+      testCases,
+      codeSnippet,
+      referenceSolution,
+      userId: req.user.id,
+    },
+  });
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "New problem created successfully", problem));
 };
 
-const getAllProblems = async (req, res, next) => {
+const getAllProblems = async (_req, res) => {
   const problems = await db.problem.findMany({
     select: {
       title: true,
@@ -97,7 +68,7 @@ const getAllProblems = async (req, res, next) => {
     .json(new ApiResponse(200, "Here are your all problems", problems));
 };
 
-const getProblemById = async (req, res, next) => {
+const getProblemById = async (req, res) => {
   const { id } = req.params;
 
   const problem = await db.problem.findUnique({
@@ -117,7 +88,7 @@ const getProblemById = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "Here is your problem", problem));
 };
 
-const updateProblem = async (req, res, next) => {
+const updateProblem = async (req, res) => {
   const { id } = req.params;
   const {
     title,
@@ -131,6 +102,10 @@ const updateProblem = async (req, res, next) => {
     referenceSolution,
   } = req.body;
 
+  if (req.user.role !== "ADMIN") {
+    throw new ApiError(403, "You are not allowed to update a problem");
+  }
+
   const problem = await db.problem.findUnique({
     where: {
       id,
@@ -141,36 +116,10 @@ const updateProblem = async (req, res, next) => {
     throw new ApiError(404, "No problem found");
   }
 
-  for (const [language, solutionCode] of Object.entries(referenceSolution)) {
-    const languageId = getJudge0LanguageId(language);
+  const result = validateReferenceSolution(referenceSolution, testCases);
 
-    if (!languageId) {
-      throw new ApiError(`${language} is not supported`);
-    }
-
-    const submissions = testCases.map(({ input, output }) => ({
-      source_code: solutionCode,
-      language_id: languageId,
-      stdin: input,
-      expected_output: output,
-    }));
-
-    const submissionResults = await submitBatch(submissions);
-
-    const tokens = submissionResults.map((r) => r.token);
-
-    const results = await pollBatchResults(tokens);
-
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i];
-
-      if (result.status.id !== 3) {
-        throw new ApiError(
-          400,
-          `Testcase ${i + 1} failed for language ${language}`,
-        );
-      }
-    }
+  if (!result) {
+    throw new ApiError(400, "Invalid reference solution");
   }
 
   const updatedProblem = await db.problem.update({
@@ -199,7 +148,7 @@ const updateProblem = async (req, res, next) => {
     .json(new ApiResponse(200, "Problem updated successfully", updatedProblem));
 };
 
-const deleteProblem = async (req, res, next) => {
+const deleteProblem = async (req, res) => {
   const { id } = req.params;
 
   const problem = await db.problem.findUnique({
