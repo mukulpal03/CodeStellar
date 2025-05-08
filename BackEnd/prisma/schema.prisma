@@ -39,6 +39,7 @@ model User {
   Problem                 Problem[]
   Submission              Submission[]
   ProblemSolved           ProblemSolved[]
+  Sheet                   Sheet[]
 }
 
 enum Difficulty {
@@ -64,9 +65,10 @@ model Problem {
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @default(now())
 
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  submission    Submission[]
-  ProblemSolved ProblemSolved[]
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submission     Submission[]
+  ProblemSolved  ProblemSolved[]
+  ProblemInSheet ProblemInSheet[]
 }
 
 model Submission {
@@ -122,4 +124,32 @@ model ProblemSolved {
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([userId, problemId])
+}
+
+model Sheet {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  problems ProblemInSheet[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, userId])
+}
+
+model ProblemInSheet {
+  id        String   @id @default(uuid())
+  sheetId   String
+  problemId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  Sheet   Sheet   @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([sheetId, problemId])
 }
