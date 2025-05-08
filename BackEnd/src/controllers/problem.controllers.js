@@ -21,7 +21,7 @@ const createProblem = async (req, res, next) => {
   } = req.body;
 
   if (req.user.role !== "ADMIN") {
-    return next(new ApiError(403, "You are not allowed to create a problem"));
+    throw new ApiError(403, "You are not allowed to create a problem");
   }
 
   try {
@@ -29,7 +29,7 @@ const createProblem = async (req, res, next) => {
       const languageId = getJudge0LanguageId(language);
 
       if (!languageId) {
-        return next(new ApiError(400, `Language ${language} is not supported`));
+        throw new ApiError(400, `Language ${language} is not supported`);
       }
 
       const submissions = testCases.map(({ input, output }) => ({
@@ -49,11 +49,9 @@ const createProblem = async (req, res, next) => {
         const result = results[i];
 
         if (result.status.id !== 3) {
-          return next(
-            new ApiError(
-              400,
-              `Testcase ${i + 1} failed for language ${language}`,
-            ),
+          throw new ApiError(
+            400,
+            `Testcase ${i + 1} failed for language ${language}`,
           );
         }
       }
@@ -78,7 +76,7 @@ const createProblem = async (req, res, next) => {
       .status(201)
       .json(new ApiResponse(201, "New problem created successfully", problem));
   } catch (error) {
-    return next(new ApiError(500, "Error while creating a problem"));
+    throw new ApiError(500, "Error while creating a problem");
   }
 };
 
@@ -91,7 +89,7 @@ const getAllProblems = async (req, res, next) => {
   });
 
   if (!problems) {
-    return next(new ApiError(404, "No problems found"));
+    throw new ApiError(404, "No problems found");
   }
 
   res
@@ -113,7 +111,7 @@ const getProblemById = async (req, res, next) => {
   });
 
   if (!problem) {
-    return next(new ApiError(404, "No problem found"));
+    throw new ApiError(404, "No problem found");
   }
 
   res.status(200).json(new ApiResponse(200, "Here is your problem", problem));
@@ -140,14 +138,14 @@ const updateProblem = async (req, res, next) => {
   });
 
   if (!problem) {
-    return next(new ApiError(404, "No problem found"));
+    throw new ApiError(404, "No problem found");
   }
 
   for (const [language, solutionCode] of Object.entries(referenceSolution)) {
     const languageId = getJudge0LanguageId(language);
 
     if (!languageId) {
-      return next(new ApiError(`${language} is not supported`));
+      throw new ApiError(`${language} is not supported`);
     }
 
     const submissions = testCases.map(({ input, output }) => ({
@@ -167,11 +165,9 @@ const updateProblem = async (req, res, next) => {
       const result = results[i];
 
       if (result.status.id !== 3) {
-        return next(
-          new ApiError(
-            400,
-            `Testcase ${i + 1} failed for language ${language}`,
-          ),
+        throw new ApiError(
+          400,
+          `Testcase ${i + 1} failed for language ${language}`,
         );
       }
     }
@@ -213,7 +209,7 @@ const deleteProblem = async (req, res, next) => {
   });
 
   if (!problem) {
-    return next(new ApiError(404, "No problem found"));
+    throw new ApiError(404, "No problem found");
   }
 
   await db.problem.delete({
@@ -225,4 +221,38 @@ const deleteProblem = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "Problem deleted successfully"));
 };
 
-export { createProblem, getAllProblems, getProblemById, updateProblem, deleteProblem };
+const getSolvedProblems = async (req, res) => {
+  const problems = await db.problem.findMany({
+    where: {
+      ProblemSolved: {
+        some: {
+          userId: req.user.id,
+        },
+      },
+    },
+    include: {
+      ProblemSolved: {
+        where: {
+          userId: req.user.id,
+        },
+      },
+    },
+  });
+
+  if (!problems) {
+    throw new ApiError(404, "No problems found");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Here are your solved problems", problems));
+};
+
+export {
+  createProblem,
+  getAllProblems,
+  getProblemById,
+  updateProblem,
+  deleteProblem,
+  getSolvedProblems,
+};

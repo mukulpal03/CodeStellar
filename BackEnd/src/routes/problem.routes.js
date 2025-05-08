@@ -6,6 +6,7 @@ import {
   deleteProblem,
   getAllProblems,
   getProblemById,
+  getSolvedProblems,
   updateProblem,
 } from "../controllers/problem.controllers.js";
 
@@ -21,5 +22,7 @@ router
   .get(isLoggedIn, asyncHandler(getProblemById))
   .put(isLoggedIn, checkAdmin, asyncHandler(updateProblem))
   .delete(isLoggedIn, checkAdmin, asyncHandler(deleteProblem));
+
+router.route("/solved").get(isLoggedIn, asyncHandler(getSolvedProblems));
 
 export default router;
