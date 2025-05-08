@@ -6,7 +6,7 @@ const authLimiter = rateLimit({
   limit: 5,
   standardHeaders: "draft-8",
   legacyHeaders: false,
-  message: new ApiError(429, "Too many attempts. Please try again later.")
+  message: "Too many attempts. Please try again later.",
 });
 
 export { authLimiter };
