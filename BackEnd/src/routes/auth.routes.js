@@ -20,18 +20,23 @@ import {
 } from "../validators/user.validators.js";
 import { validateData } from "../middlewares/uservalidator.middleware.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
+import { authLimiter } from "../middlewares/limitter.middleware.js";
 
 const router = Router();
 
 router
   .route("/register")
-  .post(validateData(registerUserSchema), asyncHandler(registerUser));
+  .post(
+    authLimiter,
+    validateData(registerUserSchema),
+    asyncHandler(registerUser),
+  );
 
-router.route("/verify/:token").post(asyncHandler(verifyUser));
+router.route("/verify/:token").post(authLimiter, asyncHandler(verifyUser));
 
 router
   .route("/login")
-  .post(validateData(loginUserSchema), asyncHandler(loginUser));
+  .post(authLimiter, validateData(loginUserSchema), asyncHandler(loginUser));
 
 router.route("/logout").post(isLoggedIn, asyncHandler(logoutUser));
 
@@ -43,11 +48,11 @@ router
 
 router
   .route("/forgot-password")
-  .get(validateData(EmailSchema), asyncHandler(forgotPasswordReq));
+  .get(authLimiter, validateData(EmailSchema), asyncHandler(forgotPasswordReq));
 
 router
   .route("/reset-password/:token")
-  .post(validateData(passwordSchema), asyncHandler(resetPassword));
+  .post(authLimiter, validateData(passwordSchema), asyncHandler(resetPassword));
 
 router
   .route("/change-password")
