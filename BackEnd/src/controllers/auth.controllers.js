@@ -40,7 +40,7 @@ async function generateAccessAndRefreshToken(userId) {
   }
 }
 
-const registerUser = async (req, res, next) => {
+const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
 
   const existingUser = await db.user.findUnique({
@@ -50,7 +50,7 @@ const registerUser = async (req, res, next) => {
   });
 
   if (existingUser) {
-    return next(new ApiError(400, "User with this email already exists"));
+    throw new ApiError(400, "User with this email already exists");
   }
 
   const token = crypto.randomBytes(32).toString("hex");
@@ -67,7 +67,7 @@ const registerUser = async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new ApiError(500, "Error while registering the user"));
+    throw new ApiError(500, "Error while registering the user");
   }
 
   await sendMail({
@@ -102,11 +102,11 @@ const registerUser = async (req, res, next) => {
     );
 };
 
-const verifyUser = async (req, res, next) => {
+const verifyUser = async (req, res) => {
   const { token } = req.params;
 
   if (!token) {
-    return next(new ApiError(400, "Token is missing"));
+    throw new ApiError(400, "Token is missing");
   }
 
   const user = await db.user.findFirst({
@@ -116,28 +116,26 @@ const verifyUser = async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new ApiError(404, "Invalid verification token"));
-  }
-
-  if (user.isVerified) {
-    return res.status(200).json({ message: "User already verified" });
+    throw new ApiError(404, "Invalid verification token");
   }
 
   if (user.verificationTokenExpiry < new Date()) {
-    return next(new ApiError(400, "Verification token has expired"));
+    throw new ApiError(400, "Verification token has expired");
   }
 
   await db.user.update({
     where: { id: user.id },
     data: {
       isVerified: true,
+      verificationToken: null,
+      verificationTokenExpiry: null,
     },
   });
 
   res.status(200).json(new ApiResponse(200, "User verified successfully"));
 };
 
-const loginUser = async (req, res, next) => {
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   const userExists = await db.user.findUnique({
@@ -147,13 +145,13 @@ const loginUser = async (req, res, next) => {
   });
 
   if (!userExists) {
-    return next(new ApiError(401, "Invalid email or password"));
+    throw new ApiError(401, "Invalid email or password");
   }
 
   const matchPassword = await bcrypt.compare(password, userExists.password);
 
   if (!matchPassword) {
-    return next(new ApiError(401, "Invalid email or password"));
+    throw new ApiError(401, "Invalid email or password");
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
@@ -177,7 +175,7 @@ const loginUser = async (req, res, next) => {
     );
 };
 
-const logoutUser = async (req, res, next) => {
+const logoutUser = async (req, res) => {
   const id = req.user?.id;
 
   const user = await db.user.update({
@@ -185,7 +183,7 @@ const logoutUser = async (req, res, next) => {
       id,
     },
     omit: {
-      password: false,
+      password: true,
     },
     data: {
       refreshToken: null,
@@ -193,7 +191,7 @@ const logoutUser = async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new ApiError(500, "Error while logging out user"));
+    throw new ApiError(500, "Error while logging out user");
   }
 
   const cookieOptions = {
@@ -208,13 +206,11 @@ const logoutUser = async (req, res, next) => {
     .json(new ApiResponse(200, "User logged out successfully"));
 };
 
-const refreshAccessToken = async (req, res, next) => {
+const refreshAccessToken = async (req, res) => {
   const currRefreshToken = req.cookies?.refreshToken;
 
   if (!currRefreshToken) {
-    return next(
-      new ApiError(403, "Refresh token has expired. Please log in again."),
-    );
+    throw new ApiError(403, "Refresh token has expired. Please log in again.");
   }
 
   const decoded = jwt.verify(
@@ -232,7 +228,7 @@ const refreshAccessToken = async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new ApiError(404, "No user found"));
+    throw new ApiError(404, "No user found");
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
@@ -260,7 +256,7 @@ const refreshAccessToken = async (req, res, next) => {
     );
 };
 
-const resendEmailVerification = async (req, res, next) => {
+const resendEmailVerification = async (req, res) => {
   const token = crypto.randomBytes(32).toString("hex");
 
   const user = await db.user.update({
@@ -278,7 +274,7 @@ const resendEmailVerification = async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new ApiError(500, "Error while generating token"));
+    throw new ApiError(500, "Error while generating token");
   }
 
   await sendMail({
@@ -295,7 +291,7 @@ const resendEmailVerification = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "Mail sent successfully"));
 };
 
-const forgotPasswordReq = async (req, res, next) => {
+const forgotPasswordReq = async (req, res) => {
   const { email } = req.body;
 
   const user = await db.user.findUnique({
@@ -309,7 +305,7 @@ const forgotPasswordReq = async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new ApiError(400, "Incorrect email"));
+    throw new ApiError(400, "Incorrect email");
   }
 
   const token = crypto.randomBytes(32).toString("hex");
@@ -340,7 +336,7 @@ const forgotPasswordReq = async (req, res, next) => {
     .json(new ApiResponse(200, "Reset password mail sent successfully"));
 };
 
-const resetPassword = async (req, res, next) => {
+const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
@@ -351,14 +347,11 @@ const resetPassword = async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new ApiError(403, "Invalid token"));
+    throw new ApiError(403, "Invalid token");
   }
 
-  console.log(user.resetPasswordExpiry);
-  console.log(new Date());
-
   if (user.resetPasswordExpiry < new Date()) {
-    return next(new ApiError(400, "Token expired"));
+    throw new ApiError(400, "Token expired");
   }
 
   await db.user.update({
@@ -375,7 +368,7 @@ const resetPassword = async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, "Password reset successfully"));
 };
 
-const changeCurrentPassword = async (req, res, next) => {
+const changeCurrentPassword = async (req, res) => {
   const { currentPassword, newPassword, confirmPassword } = req.body;
 
   const user = await db.user.findFirst({
@@ -387,13 +380,11 @@ const changeCurrentPassword = async (req, res, next) => {
   const matchPassword = await bcrypt.compare(currentPassword, user.password);
 
   if (!matchPassword) {
-    return next(new ApiError(401, "Current password is incorrect"));
+    throw new ApiError(401, "Current password is incorrect");
   }
 
   if (newPassword !== confirmPassword) {
-    return next(
-      new ApiError(400, "Confirm password doesn't match with new password"),
-    );
+    throw new ApiError(400, "Confirm password doesn't match with new password");
   }
 
   const passwordChanged = await db.user.update({
@@ -406,7 +397,7 @@ const changeCurrentPassword = async (req, res, next) => {
   });
 
   if (!passwordChanged) {
-    return next(new ApiError(500, "Error while changing the password"));
+    throw new ApiError(500, "Error while changing the password");
   }
 
   res.status(200).json(new ApiResponse(200, "Password changed successfully"));

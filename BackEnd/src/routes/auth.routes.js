@@ -21,6 +21,7 @@ import {
 import { validateData } from "../middlewares/uservalidator.middleware.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 import { authLimiter } from "../middlewares/limitter.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router
   .route("/register")
   .post(
     authLimiter,
+    upload.single("avatar"),
     validateData(registerUserSchema),
     asyncHandler(registerUser),
   );
