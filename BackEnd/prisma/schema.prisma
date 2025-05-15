@@ -21,12 +21,9 @@ enum userRole {
 
 model User {
   id                      String          @id @default(uuid())
-  name                    String?
   email                   String          @unique
   username                String          @unique
   password                String
-  image                   String?
-  bio                     String?
   role                    userRole        @default(USER)
   isVerified              Boolean         @default(false)
   verificationToken       String?
@@ -36,10 +33,30 @@ model User {
   resetPasswordExpiry     DateTime?
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @default(now())
+  profile                 UserProfile?
   Problem                 Problem[]
   Submission              Submission[]
   ProblemSolved           ProblemSolved[]
   Sheet                   Sheet[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  fullName    String?
+  bio         String?
+  avatar      String?
+  country     String?
+  githubURL   String?
+  linkedinURL String?
+  websiteURL  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("user_profiles")
 }
 
 enum Difficulty {
@@ -69,6 +86,8 @@ model Problem {
   submission     Submission[]
   ProblemSolved  ProblemSolved[]
   ProblemInSheet ProblemInSheet[]
+
+  @@map("problems")
 }
 
 model Submission {
@@ -91,6 +110,8 @@ model Submission {
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   testCases TestCaseResult[]
+
+  @@map("submissions")
 }
 
 model TestCaseResult {
@@ -111,6 +132,7 @@ model TestCaseResult {
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@index([submissionId])
+  @@map("test_case_results")
 }
 
 model ProblemSolved {
@@ -124,6 +146,7 @@ model ProblemSolved {
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([userId, problemId])
+  @@map("probelms_solved")
 }
 
 model Sheet {
@@ -139,6 +162,7 @@ model Sheet {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([name, userId])
+  @@map("sheets")
 }
 
 model ProblemInSheet {
@@ -152,4 +176,5 @@ model ProblemInSheet {
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([sheetId, problemId])
+  @@map("problems_in_sheets")
 }
