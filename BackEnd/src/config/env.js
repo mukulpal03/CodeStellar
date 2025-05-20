@@ -31,6 +31,10 @@ const config = {
   CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+
+  LOG_LEVEL:
+    process.env.LOG_LEVEL ||
+    (process.env.NODE_ENV === "development" ? "debug" : "info"),
 };
 
 export default config;
