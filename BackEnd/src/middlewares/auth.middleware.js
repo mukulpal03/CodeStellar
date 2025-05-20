@@ -10,7 +10,7 @@ const isLoggedIn = async (req, _res, next) => {
     if (!accessToken) {
       throw new ApiError(401, "Unauthorized access");
     }
-
+   
     const decoded = jwt.verify(accessToken, config.ACCESS_TOKEN_SECRET);
 
     const user = await db.user.findFirst({
@@ -19,6 +19,7 @@ const isLoggedIn = async (req, _res, next) => {
       },
       select: {
         role: true,
+        id: true,
       },
     });
 

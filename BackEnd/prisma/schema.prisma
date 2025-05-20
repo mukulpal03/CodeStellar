@@ -32,7 +32,7 @@ model User {
   resetPasswordToken      String?
   resetPasswordExpiry     DateTime?
   createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
   profile                 UserProfile?
   Problem                 Problem[]
   Submission              Submission[]
@@ -53,7 +53,7 @@ model UserProfile {
   linkedinURL String?
   websiteURL  String?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@map("user_profiles")
@@ -67,6 +67,7 @@ enum Difficulty {
 
 model Problem {
   id                String     @id @default(uuid())
+  slug String @unique
   title             String
   description       String
   difficulty        Difficulty @default(EASY)
@@ -74,13 +75,13 @@ model Problem {
   userId            String
   examples          Json
   constraints       Json
-  hints             String?
+  hints             Json?
   editorial         String?
   testCases         Json
   codeSnippet       Json
   referenceSolution Json
   createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   submission     Submission[]
@@ -104,7 +105,7 @@ model Submission {
   memory        String?
   time          String?
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
@@ -127,7 +128,7 @@ model TestCaseResult {
   memory         String?
   time           String?
   createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
@@ -140,7 +141,7 @@ model ProblemSolved {
   userId    String
   problemId String
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
@@ -155,7 +156,7 @@ model Sheet {
   description String?
   userId      String
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   problems ProblemInSheet[]
 
@@ -170,7 +171,7 @@ model ProblemInSheet {
   sheetId   String
   problemId String
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   Sheet   Sheet   @relation(fields: [sheetId], references: [id], onDelete: Cascade)
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
