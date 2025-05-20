@@ -16,7 +16,7 @@ const isLoggedIn = async (req, _res, next) => {
 
   let decodedToken;
   try {
-    decodedToken = jwt.verify(token, config.ACCESS_TOKEN_SECRET);
+    decodedToken = jwt.verify(accessToken, config.ACCESS_TOKEN_SECRET);
   } catch (error) {
     logger.warn(`JWT verification failed: ${error.message}`);
     if (error.name === "TokenExpiredError") {
@@ -68,7 +68,7 @@ const isLoggedIn = async (req, _res, next) => {
   }
 };
 
-export const authorizeRoles = (...allowedRoles) => {
+const authorizeRoles = (...allowedRoles) => {
   return (req, _res, next) => {
     if (!req.user || !req.user.role) {
       logger.warn(

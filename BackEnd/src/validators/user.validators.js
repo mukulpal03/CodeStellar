@@ -82,21 +82,19 @@ const passwordChangeSchema = z
   })
   .strict();
 
-export const updateProfileSchema = z.object({
-  body: z
-    .object({
-      fullName: z.string().min(2).max(100).optional(),
-      bio: z.string().max(500).optional(),
-      avatar: z.string().url("Avatar must be a valid URL").optional(),
-      country: z.string().max(50).optional(),
-      githubURL: z.string().url().optional().or(z.literal("")),
-      linkedinURL: z.string().url().optional().or(z.literal("")),
-      websiteURL: z.string().url().optional().or(z.literal("")),
-    })
-    .refine((data) => Object.keys(data).length > 0, {
-      message: "At least one field must be provided for update.",
-    }),
-});
+const updateProfileSchema = z
+  .object({
+    fullName: z.string().min(2).max(100).optional(),
+    bio: z.string().max(500).optional(),
+    avatar: z.string().url("Avatar must be a valid URL").optional(),
+    country: z.string().max(50).optional(),
+    githubURL: z.string().url().optional().or(z.literal("")),
+    linkedinURL: z.string().url().optional().or(z.literal("")),
+    websiteURL: z.string().url().optional().or(z.literal("")),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided for update.",
+  });
 
 export {
   registerUserSchema,

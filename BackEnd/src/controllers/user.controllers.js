@@ -92,26 +92,10 @@ const updateProfile = async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        updatedUserProfile,
         "User profile updated successfully",
+        updatedUserProfile,
       ),
     );
 };
 
-const deleteProfile = async (req, res) => {
-  const user = req.user;
-
-  const deletedUser = await db.user.delete({
-    where: {
-      id: user.id,
-    },
-  });
-
-  if (!deletedUser) {
-    throw new ApiError(500, "Error while deleting user");
-  }
-
-  res.status(200).json(new ApiResponse(200, "User deleted successfully"));
-};
-
-export { getProfile, updateProfile, deleteProfile };
+export { getProfile, updateProfile };
