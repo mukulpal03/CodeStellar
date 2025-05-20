@@ -82,22 +82,21 @@ const passwordChangeSchema = z
   })
   .strict();
 
-const updateProfileSchema = z.object({
-  username: z.optional(
-    z
-      .string()
-      .min(2, { message: "username must be atleast 2 characters" })
-      .max(30, { message: "username cannot exceed 30 characters" })
-      .trim()
-      .toLowerCase(),
-  ),
-  bio: z.optional(
-    z.string().max(100, { message: "Bio cannot exceed 100 characters" }),
-  ),
-  name: z.optional(
-    z.string().max(30, { message: "Name cannot exceed 30 characters" }).trim(),
-  ),
-}).strict();
+export const updateProfileSchema = z.object({
+  body: z
+    .object({
+      fullName: z.string().min(2).max(100).optional(),
+      bio: z.string().max(500).optional(),
+      avatar: z.string().url("Avatar must be a valid URL").optional(),
+      country: z.string().max(50).optional(),
+      githubURL: z.string().url().optional().or(z.literal("")),
+      linkedinURL: z.string().url().optional().or(z.literal("")),
+      websiteURL: z.string().url().optional().or(z.literal("")),
+    })
+    .refine((data) => Object.keys(data).length > 0, {
+      message: "At least one field must be provided for update.",
+    }),
+});
 
 export {
   registerUserSchema,
@@ -105,5 +104,5 @@ export {
   EmailSchema,
   passwordChangeSchema,
   passwordSchema,
-  updateProfileSchema
+  updateProfileSchema,
 };
