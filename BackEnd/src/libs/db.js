@@ -1,3 +1,4 @@
+import config from "../config/env.js";
 import { PrismaClient } from "../generated/prisma/index.js";
 import bcrypt from "bcryptjs";
 
@@ -27,4 +28,4 @@ db.$use(async (params, next) => {
   return next(params)
 });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+if (config.NODE_ENV !== "production") globalForPrisma.prisma = db;

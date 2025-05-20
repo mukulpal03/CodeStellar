@@ -13,6 +13,7 @@ import {
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import config from "../config/env.js";
 
 async function generateAccessAndRefreshToken(userId) {
   try {
@@ -58,7 +59,6 @@ const registerUser = async (req, res) => {
   const user = await db.user.create({
     data: {
       username,
-      name: username,
       email,
       password,
       verificationToken: token,
@@ -76,7 +76,7 @@ const registerUser = async (req, res) => {
     mailGenContent: registerUserMailGenContent(
       user.name,
       `
-      ${process.env.BASE_URL}/auth/verify/${token}
+      ${config.BASE_URL}/auth/verify/${token}
       `,
     ),
   });
@@ -213,10 +213,7 @@ const refreshAccessToken = async (req, res) => {
     throw new ApiError(403, "Refresh token has expired. Please log in again.");
   }
 
-  const decoded = jwt.verify(
-    currRefreshToken,
-    process.env.REFRESH_TOKEN_SECRET,
-  );
+  const decoded = jwt.verify(currRefreshToken, config.REFRESH_TOKEN_SECRET);
 
   const user = await db.user.findFirst({
     where: {
@@ -283,7 +280,7 @@ const resendEmailVerification = async (req, res) => {
     mailGenContent: registerUserMailGenContent(
       user.name,
       `
-      ${process.env.BASE_URL}/auth/verify/${token}
+      ${config.BASE_URL}/auth/verify/${token}
       `,
     ),
   });
@@ -326,7 +323,7 @@ const forgotPasswordReq = async (req, res) => {
     mailGenContent: resetPasswordMailGenContent(
       user.name,
       `
-      ${process.env.BASE_URL}/auth/reset-password/${token}
+      ${config.BASE_URL}/auth/reset-password/${token}
       `,
     ),
   });

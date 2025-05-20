@@ -1,6 +1,7 @@
 import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 import { ApiError } from "./ApiError.js";
+import config from "../config/env.js";
 
 const sendMail = async (options) => {
   try {
@@ -16,17 +17,17 @@ const sendMail = async (options) => {
     const emailText = mailGenerator.generatePlaintext(options.mailGenContent);
 
     const transporter = nodemailer.createTransport({
-      host: process.env.MAILTRAP_HOST,
-      port: process.env.MAILTRAP_PORT,
+      host: config.MAILTRAP_HOST,
+      port: config.MAILTRAP_PORT,
       secure: false,
       auth: {
-        user: process.env.MAILTRAP_USER,
-        pass: process.env.MAILTRAP_PASSWORD,
+        user: config.MAILTRAP_USER,
+        pass: config.MAILTRAP_PASSWORD,
       },
     });
 
     const mailOptions = {
-      from: process.env.MAILTRAP_SENDER_MAIL,
+      from: config.MAILTRAP_SENDER_MAIL,
       to: options.email,
       subject: options.subject,
       text: emailText,

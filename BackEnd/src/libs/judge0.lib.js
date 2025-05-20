@@ -1,4 +1,5 @@
 import axios from "axios";
+import config from "../config/env";
 
 const getJudge0LanguageId = (language) => {
   const languageMap = {
@@ -23,7 +24,7 @@ const getLanguageName = (languageId) => {
 
 const submitBatch = async (submissions) => {
   const { data } = await axios.post(
-    `${process.env.JUDGE0_API_URI}/submissions/batch?base64_encoded=false`,
+    `${config.JUDGE0_API_URI}/submissions/batch?base64_encoded=false`,
     {
       submissions,
     },
@@ -37,7 +38,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const pollBatchResults = async (tokens) => {
   while (true) {
     const { data } = await axios.get(
-      `${process.env.JUDGE0_API_URI}/submissions/batch`,
+      `${config.JUDGE0_API_URI}/submissions/batch`,
       {
         params: {
           tokens: tokens.join(","),

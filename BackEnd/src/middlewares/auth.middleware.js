@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import { db } from "../libs/db.js";
+import config from "../config/env.js";
 
 const isLoggedIn = async (req, _res, next) => {
   try {
@@ -10,7 +11,7 @@ const isLoggedIn = async (req, _res, next) => {
       throw new ApiError(401, "Unauthorized access");
     }
 
-    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const decoded = jwt.verify(accessToken, config.ACCESS_TOKEN_SECRET);
 
     const user = await db.user.findFirst({
       where: {

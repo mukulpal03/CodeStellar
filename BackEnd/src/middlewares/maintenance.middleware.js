@@ -1,7 +1,8 @@
+import config from "../config/env.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const maintenanceMode = (req, res, next) => {
-  if (process.env.MAINTENANCE_MODE === "true") {
+  if (config.MAINTENANCE_MODE === "true") {
     return res
       .status(503)
       .json(
