@@ -179,10 +179,8 @@ const logoutUser = async (req, res) => {
   const id = req.user?.id;
 
   console.log(id);
-  
 
   console.log("hello");
-  
 
   const user = await db.user.update({
     where: {

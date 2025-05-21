@@ -1,8 +1,3 @@
-import {
-  getJudge0LanguageId,
-  pollBatchResults,
-  submitBatch,
-} from "../libs/judge0.lib.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { db } from "../libs/db.js";
@@ -21,14 +16,13 @@ const createProblem = async (req, res) => {
     referenceSolution,
   } = req.body;
 
-  if (req.user.role !== "ADMIN") {
-    throw new ApiError(403, "You are not allowed to create a problem");
-  }
-
   const result = await validateReferenceSolution(referenceSolution, testCases);
 
   if (!result) {
-    throw new ApiError(400, "Invalid reference solution");
+    throw new ApiError(
+      400,
+      "The provided reference solution did not pass all test cases.",
+    );
   }
 
   const problem = await db.problem.create({

@@ -23,12 +23,44 @@ const validateReferenceSolution = async (referenceSolution, testCases) => {
 
       const submissionResults = await submitBatch(submissions);
 
+      if (!submissionResults || submissionResults.length !== testCases.length) {
+        throw new ApiError(
+          500,
+          "Failed to get submission tokens from Judge0 for all test cases.",
+        );
+      }
+
       const tokens = submissionResults.map((r) => r.token);
+
+      if (tokens.some((token) => !token)) {
+        throw new ApiError(
+          500,
+          "Received invalid submission tokens from Judge0.",
+        );
+      }
 
       const results = await pollBatchResults(tokens);
 
+      if (!results || results.length !== tokens.length) {
+        throw new ApiError(
+          500,
+          "Failed to get results from Judge0 for all submitted tokens.",
+        );
+      }
+
       for (let i = 0; i < results.length; i++) {
         const result = results[i];
+
+        if (
+          !result ||
+          !result.status ||
+          typeof result.status.id === "undefined"
+        ) {
+          throw new ApiError(
+            500,
+            `Received an invalid result structure from Judge0 for test case ${testCaseNumber} in ${language}.`,
+          );
+        }
 
         if (result.status.id !== 3) {
           throw new ApiError(

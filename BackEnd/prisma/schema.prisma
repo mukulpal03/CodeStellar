@@ -67,7 +67,6 @@ enum Difficulty {
 
 model Problem {
   id                String     @id @default(uuid())
-  slug String @unique
   title             String
   description       String
   difficulty        Difficulty @default(EASY)
