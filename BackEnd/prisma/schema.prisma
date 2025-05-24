@@ -68,6 +68,7 @@ enum Difficulty {
 model Problem {
   id                String     @id @default(uuid())
   title             String
+  slug String? @unique
   description       String
   difficulty        Difficulty @default(EASY)
   tags              String[]
@@ -90,6 +91,12 @@ model Problem {
   @@map("problems")
 }
 
+enum SubmissionStatus {
+  PENDING              
+  ACCEPTED            
+  WRONG_ANSWER         
+}
+
 model Submission {
   id            String   @id @default(uuid())
   userId        String
@@ -100,9 +107,9 @@ model Submission {
   stdout        String?
   stderr        String?
   compileOutput String?
-  status        String
-  memory        String?
-  time          String?
+  status        SubmissionStatus @default(PENDING)
+  memory        Int?
+  time          Float?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -124,8 +131,8 @@ model TestCaseResult {
   stderr         String?
   compileOutput  String?
   status         String?
-  memory         String?
-  time           String?
+  memory         Int?
+  time           Float?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -146,7 +153,7 @@ model ProblemSolved {
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([userId, problemId])
-  @@map("probelms_solved")
+  @@map("problems_solved")
 }
 
 model Sheet {

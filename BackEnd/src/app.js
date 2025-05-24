@@ -10,6 +10,8 @@ import executionRoutes from "./routes/execute-code.routes.js";
 import submissionRoutes from "./routes/submission.routes.js";
 import sheetRoutes from "./routes/sheet.routes.js";
 import { maintenanceMode } from "./middlewares/maintenance.middleware.js";
+import { limitter } from "./middlewares/limitter.middleware.js";
+import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
 
@@ -18,6 +20,7 @@ app.use(cors());
 app.use(cookieParser());
 app.use(helmet());
 app.use(maintenanceMode);
+app.use(limitter);
 
 app.use("/api/v1/health", healthCheckRoutes);
 app.use("/api/v1/auth", authRoutes);
@@ -27,11 +30,8 @@ app.use("/api/v1/execute-code", executionRoutes);
 app.use("/api/v1/submissions", submissionRoutes);
 app.use("/api/v1/sheets", sheetRoutes);
 
-app.use((_req, res) => {
-  res.status(404).json({
-    message: "Page not found",
-    success: false,
-  });
+app.use((req, _res, next) => {
+  next(new ApiError(404, `Not Found - ${req.originalUrl}`));
 });
 
 app.use((err, _req, res, _next) => {
