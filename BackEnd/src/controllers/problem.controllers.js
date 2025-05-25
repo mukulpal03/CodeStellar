@@ -2,6 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { db } from "../libs/db.js";
 import { validateReferenceSolution } from "../services/problem.service.js";
+import { generateUniqueSlug } from "../utils/slug.js";
 
 const createProblem = async (req, res) => {
   const {
@@ -25,9 +26,12 @@ const createProblem = async (req, res) => {
     );
   }
 
+  const slug = await generateUniqueSlug(title, db);
+
   const problem = await db.problem.create({
     data: {
       title,
+      slug,
       description,
       difficulty,
       tags,
@@ -47,97 +51,153 @@ const createProblem = async (req, res) => {
 
 const getAllProblems = async (_req, res) => {
   const problems = await db.problem.findMany({
+    orderBy: { createdAt: "desc" },
     select: {
       title: true,
       id: true,
+      slug: true,
+      difficulty: true,
+      tags: true,
     },
   });
-
-  if (!problems) {
-    throw new ApiError(404, "No problems found");
-  }
 
   res
     .status(200)
     .json(new ApiResponse(200, "Here are your all problems", problems));
 };
 
-const getProblemById = async (req, res) => {
-  const { id } = req.params;
+const getProblemBySlugForUser = async (req, res) => {
+  const { slug } = req.params;
 
   const problem = await db.problem.findUnique({
     where: {
-      id,
+      slug,
     },
     select: {
-      title: true,
       id: true,
+      title: true,
+      slug: true,
+      description: true,
+      difficulty: true,
+      tags: true,
+      examples: true,
+      constraints: true,
+      hints: true,
+      codeSnippet: true,
     },
   });
 
   if (!problem) {
-    throw new ApiError(404, "No problem found");
+    throw new ApiError(404, "Problem not found or not available.");
   }
 
-  res.status(200).json(new ApiResponse(200, "Here is your problem", problem));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Problem details retrieved successfully", problem),
+    );
 };
 
 const updateProblem = async (req, res) => {
   const { id } = req.params;
-  const {
-    title,
-    description,
-    difficulty,
-    tags,
-    examples,
-    constraints,
-    testCases,
-    codeSnippet,
-    referenceSolution,
-  } = req.body;
 
-  if (req.user.role !== "ADMIN") {
-    throw new ApiError(403, "You are not allowed to update a problem");
-  }
-
-  const problem = await db.problem.findUnique({
-    where: {
-      id,
-    },
+  const existingProblem = await db.problem.findUnique({
+    where: { id },
   });
 
-  if (!problem) {
-    throw new ApiError(404, "No problem found");
+  if (!existingProblem) {
+    throw new ApiError(404, "Problem not found to update.");
   }
 
-  const result = validateReferenceSolution(referenceSolution, testCases);
+  const dataToUpdate = {};
+  const allowedFields = [
+    "title",
+    "description",
+    "difficulty",
+    "tags",
+    "examples",
+    "constraints",
+    "hints",
+    "editorial",
+    "testCases",
+    "codeSnippet",
+    "referenceSolution",
+  ];
 
-  if (!result) {
-    throw new ApiError(400, "Invalid reference solution");
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      dataToUpdate[field] = req.body[field];
+    }
+  });
+
+  if (Object.keys(dataToUpdate).length === 0) {
+    throw new ApiError(400, "No valid fields provided for update.");
+  }
+
+  if (dataToUpdate.title && dataToUpdate.title !== existingProblem.title) {
+    dataToUpdate.slug = await generateUniqueSlug(dataToUpdate.title, db);
+  } else {
+    delete dataToUpdate.slug;
+  }
+
+  if (
+    dataToUpdate.referenceSolution !== undefined ||
+    dataToUpdate.testCases !== undefined
+  ) {
+    const solutionToValidate =
+      dataToUpdate.referenceSolution !== undefined
+        ? dataToUpdate.referenceSolution
+        : existingProblem.referenceSolution;
+    const testCasesToValidateWith =
+      dataToUpdate.testCases !== undefined
+        ? dataToUpdate.testCases
+        : existingProblem.testCases;
+
+    if (
+      !solutionToValidate ||
+      !Array.isArray(testCasesToValidateWith) ||
+      testCasesToValidateWith.length === 0
+    ) {
+      throw new ApiError(
+        400,
+        "If updating reference solution or test cases, both must be valid and test cases non-empty.",
+      );
+    }
+    const validationResult = await validateReferenceSolution(
+      solutionToValidate,
+      testCasesToValidateWith,
+    );
+
+    if (!validationResult) {
+      throw new ApiError(
+        400,
+        "The provided reference solution did not pass validation.",
+      );
+    }
   }
 
   const updatedProblem = await db.problem.update({
-    where: {
-      id: problem.id,
-    },
-    data: {
-      title,
-      description,
-      difficulty,
-      tags,
-      examples,
-      constraints,
-      testCases,
-      codeSnippet,
-      referenceSolution,
-    },
+    where: { id },
+    data: dataToUpdate,
     select: {
-      title: true,
       id: true,
+      title: true,
+      slug: true,
+      description: true,
+      difficulty: true,
+      tags: true,
+      examples: true,
+      constraints: true,
+      hints: true,
+      editorial: true,
+      codeSnippet: true,
+      userId: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, "Problem updated successfully", updatedProblem));
 };
@@ -161,7 +221,7 @@ const deleteProblem = async (req, res) => {
     },
   });
 
-  res.status(200).json(new ApiResponse(200, "Problem deleted successfully"));
+  res.status(204).send();
 };
 
 const getSolvedProblems = async (req, res) => {
@@ -194,7 +254,7 @@ const getSolvedProblems = async (req, res) => {
 export {
   createProblem,
   getAllProblems,
-  getProblemById,
+  getProblemBySlugForUser,
   updateProblem,
   deleteProblem,
   getSolvedProblems,

@@ -5,7 +5,7 @@ import {
   createProblem,
   deleteProblem,
   getAllProblems,
-  getProblemById,
+  getProblemBySlugForUser,
   getSolvedProblems,
   updateProblem,
 } from "../controllers/problem.controllers.js";
@@ -19,9 +19,10 @@ router
 
 router
   .route("/:id")
-  .get(isLoggedIn, asyncHandler(getProblemById))
-  .put(isLoggedIn, authorizeRoles("ADMIN"), asyncHandler(updateProblem))
+  .patch(isLoggedIn, authorizeRoles("ADMIN"), asyncHandler(updateProblem))
   .delete(isLoggedIn, authorizeRoles("ADMIN"), asyncHandler(deleteProblem));
+
+router.route("/:slug").get(isLoggedIn, asyncHandler(getProblemBySlugForUser));
 
 router.route("/solved").get(isLoggedIn, asyncHandler(getSolvedProblems));
 

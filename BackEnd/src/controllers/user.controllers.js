@@ -41,8 +41,6 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   const userId = req.user.id;
-  const { fullName, bio, avatar, country, githubURL, linkedinURL, websiteURL } =
-    req.body;
 
   const profileDataToUpdate = {};
 
@@ -56,7 +54,7 @@ const updateProfile = async (req, res) => {
     throw new ApiError(400, "No data provided to update profile.");
   }
 
-  const updatedUserProfile = await prisma.userProfile.upsert({
+  const updatedUserProfile = await db.userProfile.upsert({
     where: { userId: userId },
     update: profileDataToUpdate,
     create: {
