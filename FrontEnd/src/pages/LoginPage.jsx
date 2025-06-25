@@ -5,6 +5,7 @@ import { Code, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { z } from "zod";
 import { useState } from "react";
 import AuthImagePattern from "../components/AuthImagePattern";
+import { useAuthStore } from "../store/useAuthStore";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -14,6 +15,8 @@ const loginSchema = z.object({
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
+  const { login, isLoggingIn } = useAuthStore();
+
   const {
     register,
     handleSubmit,
@@ -21,7 +24,11 @@ function LoginPage() {
   } = useForm({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (data) => {
-    console.log(data);
+    try {
+      await login(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -99,8 +106,19 @@ function LoginPage() {
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary w-full">
-              Login
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={isLoggingIn}
+            >
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Sign in"
+              )}
             </button>
           </form>
 
