@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
+import Layout from "./layout/Layout";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -23,7 +24,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start">
+    <div className="flex flex-col items-center justify-start ">
       <Toaster />
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -32,13 +33,15 @@ function App() {
             element={authUser ? <HomePage /> : <Navigate to={"/login"} />}
           />
         </Route>
+
         <Route
           path="/login"
-          element={!authUser ? <LoginPage /> : <HomePage />}
+          element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
         />
+
         <Route
           path="/signup"
-          element={!authUser ? <SignUpPage /> : <HomePage />}
+          element={!authUser ? <SignUpPage /> : <Navigate to={"/"} />}
         />
       </Routes>
     </div>

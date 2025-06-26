@@ -26,7 +26,7 @@ app.use(
 app.use(cookieParser());
 app.use(helmet());
 app.use(maintenanceMode);
-app.use(limitter);
+// app.use(limitter);
 
 app.use("/api/v1/health", healthCheckRoutes);
 app.use("/api/v1/auth", authRoutes);
