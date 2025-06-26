@@ -28,17 +28,16 @@ const router = Router();
 router
   .route("/register")
   .post(
-    authLimiter,
     upload.single("avatar"),
     validateData(registerUserSchema),
     asyncHandler(registerUser),
   );
 
-router.route("/verify/:token").post(authLimiter, asyncHandler(verifyUser));
+router.route("/verify/:token").post(asyncHandler(verifyUser));
 
 router
   .route("/login")
-  .post(authLimiter, validateData(loginUserSchema), asyncHandler(loginUser));
+  .post(validateData(loginUserSchema), asyncHandler(loginUser));
 
 router.route("/logout").post(isLoggedIn, asyncHandler(logoutUser));
 
