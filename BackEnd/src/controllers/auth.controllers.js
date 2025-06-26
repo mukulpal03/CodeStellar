@@ -169,8 +169,10 @@ const loginUser = async (req, res) => {
     .status(201)
     .json(
       new ApiResponse(200, "User logged in successfully", {
+        username: userExists.username,
+        email: userExists.email,
         accessToken,
-        refreshToken,
+        refreshToken
       }),
     );
 };
