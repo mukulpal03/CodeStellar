@@ -12,11 +12,17 @@ import sheetRoutes from "./routes/sheet.routes.js";
 import { maintenanceMode } from "./middlewares/maintenance.middleware.js";
 import { limitter } from "./middlewares/limitter.middleware.js";
 import { ApiError } from "./utils/ApiError.js";
+import config from "./config/env.js";
 
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: config.ORIGIN_URL,
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 app.use(helmet());
 app.use(maintenanceMode);

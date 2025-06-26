@@ -9,6 +9,7 @@ const config = {
   BASE_URL:
     process.env.BASE_URL || `http://localhost:${process.env.PORT || 4000}`,
   MAINTENANCE_MODE: process.env.MAINTENANCE_MODE === "true",
+  ORIGIN_URL: process.env.ORIGIN_URL || "http://localhost:5173",
 
   // Mailtrap
   MAILTRAP_HOST: process.env.MAILTRAP_HOST,
