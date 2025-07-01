@@ -10,7 +10,7 @@ export const sampledpData = {
     "To reach the nth step, you can either come from the (n-1)th step or the (n-2)th step.",
   editorial:
     "This is a classic dynamic programming problem. The number of ways to reach the nth step is the sum of the number of ways to reach the (n-1)th step and the (n-2)th step, forming a Fibonacci-like sequence.",
-  testcases: [
+  testCases: [
     {
       input: "2",
       output: "2",
@@ -44,7 +44,7 @@ export const sampledpData = {
         "There are five ways to climb to the top:\n1. 1 step + 1 step + 1 step + 1 step\n2. 1 step + 1 step + 2 steps\n3. 1 step + 2 steps + 1 step\n4. 2 steps + 1 step + 1 step\n5. 2 steps + 2 steps",
     },
   },
-  codeSnippets: {
+  codeSnippet: {
     JAVASCRIPT: `/**
 * @param {number} n
 * @return {number}
@@ -107,7 +107,7 @@ class Main {
   }
 }`,
   },
-  referenceSolutions: {
+  referenceSolution: {
     JAVASCRIPT: `/**
 * @param {number} n
 * @return {number}
@@ -256,7 +256,7 @@ export const sampleStringProblem = {
     "Consider using two pointers, one from the start and one from the end, moving towards the center.",
   editorial:
     "We can use two pointers approach to check if the string is a palindrome. One pointer starts from the beginning and the other from the end, moving towards each other.",
-  testcases: [
+  testCases: [
     {
       input: "A man, a plan, a canal: Panama",
       output: "true",
@@ -287,7 +287,7 @@ export const sampleStringProblem = {
       explanation: '"amanaplanacanalpanama" is a palindrome.',
     },
   },
-  codeSnippets: {
+  codeSnippet: {
     JAVASCRIPT: `/**
    * @param {string} s
    * @return {boolean}
@@ -351,7 +351,7 @@ public class Main {
 }
 `,
   },
-  referenceSolutions: {
+  referenceSolution: {
     JAVASCRIPT: `/**
    * @param {string} s
    * @return {boolean}

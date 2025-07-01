@@ -1,34 +1,38 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import { Code, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+
 import { z } from "zod";
-import { useState } from "react";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { useAuthStore } from "../store/useAuthStore";
 
 const SignUpSchema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(6, "Password must be atleast of 6 characters"),
-  username: z.string().min(3, "username must be atleast 3 character"),
+  name: z.string().min(3, "Name must be atleast 3 character"),
 });
 
-function SignUpPage() {
+const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
-  const { signup, isSignInUp } = useAuthStore();
+  const { signup, isSigninUp } = useAuthStore();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(SignUpSchema) });
+  } = useForm({
+    resolver: zodResolver(SignUpSchema),
+  });
 
   const onSubmit = async (data) => {
     try {
       await signup(data);
+      console.log("signup data", data);
     } catch (error) {
-      console.log(error);
+      console.error("SignUp failed:", error);
     }
   };
 
@@ -47,10 +51,12 @@ function SignUpPage() {
             </div>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* name */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-medium">Username</span>
+                <span className="label-text font-medium">Name</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -58,20 +64,21 @@ function SignUpPage() {
                 </div>
                 <input
                   type="text"
-                  {...register("username")}
+                  {...register("name")}
                   className={`input input-bordered w-full pl-10 ${
-                    errors.username ? "input-error" : ""
+                    errors.name ? "input-error" : ""
                   }`}
                   placeholder="John Doe"
                 />
               </div>
-              {errors.username && (
+              {errors.name && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.username.message}
+                  {errors.name.message}
                 </p>
               )}
             </div>
 
+            {/* Email */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Email</span>
@@ -96,6 +103,7 @@ function SignUpPage() {
               )}
             </div>
 
+            {/* Password */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Password</span>
@@ -131,12 +139,13 @@ function SignUpPage() {
               )}
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               className="btn btn-primary w-full"
-              disabled={isSignInUp}
+              disabled={isSigninUp}
             >
-              {isSignInUp ? (
+              {isSigninUp ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   Loading...
@@ -147,6 +156,7 @@ function SignUpPage() {
             </button>
           </form>
 
+          {/* Footer */}
           <div className="text-center">
             <p className="text-base-content/60">
               Already have an account?{" "}
@@ -158,6 +168,7 @@ function SignUpPage() {
         </div>
       </div>
 
+      {/* Right Side - Image/Pattern */}
       <AuthImagePattern
         title={"Welcome to our platform!"}
         subtitle={
@@ -166,6 +177,6 @@ function SignUpPage() {
       />
     </div>
   );
-}
+};
 
 export default SignUpPage;

@@ -30,19 +30,19 @@ const CreateProblemForm = () => {
   } = useForm({
     resolver: zodResolver(problemSchema),
     defaultValues: {
-      testcases: [{ input: "", output: "" }],
+      testCases: [{ input: "", output: "" }],
       tags: [""],
       examples: {
         JAVASCRIPT: { input: "", output: "", explanation: "" },
         PYTHON: { input: "", output: "", explanation: "" },
         JAVA: { input: "", output: "", explanation: "" },
       },
-      codeSnippets: {
+      codeSnippet: {
         JAVASCRIPT: "function solution() {\n  // Write your code here\n}",
         PYTHON: "def solution():\n    # Write your code here\n    pass",
         JAVA: "public class Solution {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}",
       },
-      referenceSolutions: {
+      referenceSolution: {
         JAVASCRIPT: "// Add your reference solution here",
         PYTHON: "# Add your reference solution here",
         JAVA: "// Add your reference solution here",
@@ -57,7 +57,7 @@ const CreateProblemForm = () => {
     replace: replacetestcases,
   } = useFieldArray({
     control,
-    name: "testcases",
+    name: "testCases",
   });
 
   const {
@@ -73,9 +73,11 @@ const CreateProblemForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (value) => {
+    console.log(value);
+
     try {
       setIsLoading(true);
-      const res = await axiosInstance.post("/problems/create-problem", value);
+      const res = await axiosInstance.post("/problems/", value);
       console.log(res.data);
       toast.success(res.data.message || "Problem Created successfully⚡");
       navigation("/");
@@ -91,7 +93,7 @@ const CreateProblemForm = () => {
     const sampleData = sampleType === "DP" ? sampledpData : sampleStringProblem;
 
     replaceTags(sampleData.tags.map((tag) => tag));
-    replacetestcases(sampleData.testcases.map((tc) => tc));
+    replacetestcases(sampleData.testCases.map((tc) => tc));
 
     // Reset the form with sample data
     reset(sampleData);
@@ -292,13 +294,13 @@ const CreateProblemForm = () => {
                           </label>
                           <textarea
                             className="textarea textarea-bordered min-h-24 w-full p-3 resize-y"
-                            {...register(`testcases.${index}.input`)}
+                            {...register(`testCases.${index}.input`)}
                             placeholder="Enter test case input"
                           />
-                          {errors.testcases?.[index]?.input && (
+                          {errors.testCases?.[index]?.input && (
                             <label className="label">
                               <span className="label-text-alt text-error">
-                                {errors.testcases[index].input.message}
+                                {errors.testCases[index].input.message}
                               </span>
                             </label>
                           )}
@@ -311,13 +313,13 @@ const CreateProblemForm = () => {
                           </label>
                           <textarea
                             className="textarea textarea-bordered min-h-24 w-full p-3 resize-y"
-                            {...register(`testcases.${index}.output`)}
+                            {...register(`testCases.${index}.output`)}
                             placeholder="Enter expected output"
                           />
-                          {errors.testcases?.[index]?.output && (
+                          {errors.testCases?.[index]?.output && (
                             <label className="label">
                               <span className="label-text-alt text-error">
-                                {errors.testcases[index].output.message}
+                                {errors.testCases[index].output.message}
                               </span>
                             </label>
                           )}
@@ -327,10 +329,10 @@ const CreateProblemForm = () => {
                   </div>
                 ))}
               </div>
-              {errors.testcases && !Array.isArray(errors.testcases) && (
+              {errors.testCases && !Array.isArray(errors.testcases) && (
                 <div className="mt-2">
                   <span className="text-error text-sm">
-                    {errors.testcases.message}
+                    {errors.testCases.message}
                   </span>
                 </div>
               )}
@@ -357,7 +359,7 @@ const CreateProblemForm = () => {
                         </h4>
                         <div className="border rounded-md overflow-hidden">
                           <Controller
-                            name={`codeSnippets.${language}`}
+                            name={`codeSnippet.${language}`}
                             control={control}
                             render={({ field }) => (
                               <Editor
@@ -378,10 +380,10 @@ const CreateProblemForm = () => {
                             )}
                           />
                         </div>
-                        {errors.codeSnippets?.[language] && (
+                        {errors.codeSnippet?.[language] && (
                           <div className="mt-2">
                             <span className="text-error text-sm">
-                              {errors.codeSnippets[language].message}
+                              {errors.codeSnippet[language].message}
                             </span>
                           </div>
                         )}
@@ -397,7 +399,7 @@ const CreateProblemForm = () => {
                         </h4>
                         <div className="border rounded-md overflow-hidden">
                           <Controller
-                            name={`referenceSolutions.${language}`}
+                            name={`referenceSolution.${language}`}
                             control={control}
                             render={({ field }) => (
                               <Editor
@@ -418,10 +420,10 @@ const CreateProblemForm = () => {
                             )}
                           />
                         </div>
-                        {errors.referenceSolutions?.[language] && (
+                        {errors.referenceSolution?.[language] && (
                           <div className="mt-2">
                             <span className="text-error text-sm">
-                              {errors.referenceSolutions[language].message}
+                              {errors.referenceSolution[language].message}
                             </span>
                           </div>
                         )}

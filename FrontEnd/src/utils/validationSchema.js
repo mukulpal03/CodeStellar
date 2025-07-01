@@ -8,7 +8,7 @@ export const problemSchema = z.object({
   constraints: z.string().min(1, "Constraints are required"),
   hints: z.string().optional(),
   editorial: z.string().optional(),
-  testcases: z
+  testCases: z
     .array(
       z.object({
         input: z.string().min(1, "Input is required"),
@@ -33,12 +33,12 @@ export const problemSchema = z.object({
       explanation: z.string().optional(),
     }),
   }),
-  codeSnippets: z.object({
+  codeSnippet: z.object({
     JAVASCRIPT: z.string().min(1, "JavaScript code snippet is required"),
     PYTHON: z.string().min(1, "Python code snippet is required"),
     JAVA: z.string().min(1, "Java solution is required"),
   }),
-  referenceSolutions: z.object({
+  referenceSolution: z.object({
     JAVASCRIPT: z.string().min(1, "JavaScript solution is required"),
     PYTHON: z.string().min(1, "Python solution is required"),
     JAVA: z.string().min(1, "Java solution is required"),
