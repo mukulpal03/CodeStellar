@@ -23,39 +23,66 @@ const getLanguageName = (languageId) => {
 };
 
 const submitBatch = async (submissions) => {
-  const { data } = await axios.post(
-    `${config.JUDGE0_API_URI}/submissions/batch?base64_encoded=false`,
-    {
-      submissions,
-    },
-  );
+  try {
+    const { data } = await axios.post(
+      `${config.JUDGE0_API_URI}/submissions/batch`,
+      {
+        submissions,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${config.JUDGE0_API_SECRET}`,
+        },
+      },
+    );
 
-  return data;
+    return data;
+  } catch (error) {
+    console.error(
+      error?.response?.data ?? error.message ?? "Submit batch error",
+    );
+
+    throw error;
+  }
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const pollBatchResults = async (tokens) => {
   while (true) {
-    const { data } = await axios.get(
-      `${config.JUDGE0_API_URI}/submissions/batch`,
-      {
-        params: {
-          tokens: tokens.join(","),
-          base64_encoded: false,
+    try {
+      const { data } = await axios.get(
+        `${config.JUDGE0_API_URI}/submissions/batch`,
+        {
+          params: {
+            tokens: tokens.join(","),
+            base64_encoded: false,
+          },
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${config.JUDGE0_API_SECRET}`,
+          },
         },
-      },
-    );
+      );
 
-    const results = data.submissions;
+      const results = data.submissions;
 
-    const isAllDone = results.every(
-      (r) => r.status.id !== 1 && r.status.id !== 2,
-    );
+      const isAllDone = results.every(
+        (r) => r.status.id !== 1 && r.status.id !== 2,
+      );
 
-    if (isAllDone) return results;
+      if (isAllDone) return results;
 
-    await sleep(1000);
+      await sleep(1000);
+    } catch (error) {
+      console.error(
+        error?.response?.data ?? error.message ?? "Poll batch results error",
+      );
+
+      throw error;
+    }
   }
 };
 

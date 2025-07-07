@@ -41,8 +41,6 @@ const validateReferenceSolution = async (referenceSolution, testCases) => {
 
       const results = await pollBatchResults(tokens);
 
-      console.log(results);
-
       if (!results || results.length !== tokens.length) {
         throw new ApiError(
           500,

@@ -27,6 +27,7 @@ const config = {
 
   // Judge0
   JUDGE0_API_URI: process.env.JUDGE0_API_URI,
+  JUDGE0_API_SECRET: process.env.JUDGE0_API_SECRET,
 
   // Cloudinary
   CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
