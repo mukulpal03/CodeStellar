@@ -51,13 +51,15 @@ const createProblem = async (req, res) => {
 
 const getAllProblems = async (_req, res) => {
   const problems = await db.problem.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      title: true,
-      id: true,
-      slug: true,
-      difficulty: true,
-      tags: true,
+    include: {
+      ProblemSolved: {
+        where: {
+          userId: _req.user.id,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 
