@@ -73,12 +73,9 @@ const CreateProblemForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (value) => {
-    console.log(value);
-
     try {
       setIsLoading(true);
       const res = await axiosInstance.post("/problems/", value);
-      console.log(res.data);
       toast.success(res.data.message || "Problem Created successfully⚡");
       navigation("/");
     } catch (error) {
@@ -95,7 +92,6 @@ const CreateProblemForm = () => {
     replaceTags(sampleData.tags.map((tag) => tag));
     replacetestcases(sampleData.testCases.map((tc) => tc));
 
-    // Reset the form with sample data
     reset(sampleData);
   };
 

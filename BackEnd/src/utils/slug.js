@@ -2,7 +2,7 @@ import slugify from "slugify";
 import { ApiError } from "./ApiError.js";
 import { db } from "../libs/db.js";
 
-const generateUniqueSlug = async (title, prismaClient) => {
+const generateUniqueSlug = async (title) => {
   if (!title || typeof title !== "string" || title.trim() === "") {
     throw new ApiError(
       "Title is required and must be a non-empty string to generate a slug.",
